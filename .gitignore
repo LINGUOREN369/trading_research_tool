@@ -1,0 +1,5 @@
+# ignore note_labs folder
+note_labs/
+
+# ignore Stock_History folder
+Stock_History/
