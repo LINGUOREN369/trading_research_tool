@@ -1,14 +1,14 @@
 import pandas as pd
-from collections import deque
 import yfinance as yf
+from collections import deque
 
-def fifo_pnl_with_live_price(csv_path: str, symbol: str):
+def fifo_pnl_with_live_price(csv_path: str, symbol: str, expected_price: float | None = None):
     """
     Calculate FIFO realized/unrealized P&L for a given stock symbol from the Fidelity report.
     Uses trade prices from CSV for realized P&L and fetches current market price via Yahoo Finance.
 
     Call the function with:
-    fifo_pnl_with_live_price("path/to/your/csv_file.csv", "stock_symbol")
+    fifo_pnl_with_live_price("path/to/your/csv_file.csv", "stock_symbol", expected_price=200.0)
     
     Parameters
     ----------
@@ -16,10 +16,21 @@ def fifo_pnl_with_live_price(csv_path: str, symbol: str):
         Path to your CSV file with trade history.
     symbol : str
         Stock ticker symbol (e.g., "CRCL").
+    expected_price : float | None
+        Optional scenario price per share to evaluate potential unrealized P&L. If provided,
+        additional fields are returned showing P&L at this price. If None, the scenario fields
+        mirror the live-price fields.
 
     Returns
     -------
-    dict : Summary with open quantity, avg cost, realized P&L, unrealized P&L, total P&L.
+    dict
+        Summary with open quantity, avg cost, realized P&L, unrealized P&L, total P&L at live price,
+        and scenario values at `expected_price` when supplied:
+        {
+            'symbol', 'current_price', 'open_qty', 'avg_cost', 'market_value',
+            'realized_pl', 'unrealized_pl', 'total_pl',
+            'expected_price', 'scenario_market_value', 'scenario_unrealized_pl', 'scenario_total_pl'
+        }
     """
     # ---------------- Load CSV ---------------- #
     df = pd.read_csv(csv_path)
@@ -80,15 +91,38 @@ def fifo_pnl_with_live_price(csv_path: str, symbol: str):
         # Fallback to last daily close
         current_price = float(ticker.history(period="5d")["Close"].iloc[-1])
 
-    # ---------------- Calculate Open Position Stats ---------------- #
+    # ---------------- Calculate Open Position Stats (live) ---------------- #
     open_qty = sum(q for q, _ in fifo_lots)
     open_cost = sum(q * p for q, p in fifo_lots)
-    avg_cost = open_cost / open_qty if open_qty else 0
+    avg_cost = open_cost / open_qty if open_qty else 0.0
+
     market_value = open_qty * current_price
     unrealized_pl = market_value - open_cost
     total_pl = realized_pl + unrealized_pl
 
-    # ---------------- Print Summary ---------------- #
+    # ---------------- Scenario metrics at expected_price ---------------- #
+    scenario_price = expected_price if expected_price is not None else current_price
+    scenario_market_value = open_qty * scenario_price
+    scenario_unrealized_pl = scenario_market_value - open_cost
+    scenario_total_pl = realized_pl + scenario_unrealized_pl
+
+    print(f"\n--- Based on current price: ${current_price:.2f} ---")
+    print(f"Symbol: {symbol.upper()}")
+    print(f"Current Price: ${current_price:.2f}")
+    print(f"Open Quantity: {open_qty}")
+    print(f"Average Cost: ${avg_cost:.2f}")
+    print(f"Market Value: ${market_value:.2f}")
+    print(f"Realized P&L: ${realized_pl:.2f}")
+    print(f"Unrealized P&L: ${unrealized_pl:.2f}")
+    print(f"Total P&L: ${total_pl:.2f}")
+    if expected_price is not None:
+        print(f"\n--- Scenario at Expected Price: ${expected_price:.2f} ---")
+        print(f"Scenario Market Value: ${scenario_market_value:.2f}")
+        print(f"Scenario Realized P&L: ${realized_pl:.2f}")
+        print(f"Scenario Unrealized P&L: ${scenario_unrealized_pl:.2f}")
+        print(f"Scenario Total P&L: ${scenario_total_pl:.2f}")
+
+    print("\n")
 
     return {
         "symbol": symbol.upper(),
@@ -98,5 +132,12 @@ def fifo_pnl_with_live_price(csv_path: str, symbol: str):
         "market_value": market_value,
         "realized_pl": realized_pl,
         "unrealized_pl": unrealized_pl,
-        "total_pl": total_pl
+        "total_pl": total_pl,
+        # Scenario fields
+        "expected_price": expected_price,
+        "scenario_market_value": scenario_market_value,
+        "scenario_unrealized_pl": scenario_unrealized_pl,
+        "scenario_total_pl": scenario_total_pl,
     }
+    
+    

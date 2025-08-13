@@ -15,3 +15,6 @@ Stock_History/
 
 # ignore jff.py file
 usage.ipynb
+
+#iignore testing.ipynb
+testing.ipynb
