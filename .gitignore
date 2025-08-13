@@ -3,3 +3,16 @@ note_labs/
 
 # ignore Stock_History folder
 Stock_History/
+
+# ignore any .csv files
+*.csv
+
+# ignore any .pyc files
+*.pyc
+
+# ignore any .pyo files
+*.pyo
+
+# ignore jff.py file
+jff.py
+
