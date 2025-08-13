@@ -14,5 +14,4 @@ Stock_History/
 *.pyo
 
 # ignore jff.py file
-jff.py
-
+usage.ipynb

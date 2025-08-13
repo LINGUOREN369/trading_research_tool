@@ -4,7 +4,7 @@ import yfinance as yf
 
 def fifo_pnl_with_live_price(csv_path: str, symbol: str):
     """
-    Calculate FIFO realized/unrealized P&L for a given stock symbol.
+    Calculate FIFO realized/unrealized P&L for a given stock symbol from the Fidelity report.
     Uses trade prices from CSV for realized P&L and fetches current market price via Yahoo Finance.
 
     Call the function with:
@@ -89,14 +89,6 @@ def fifo_pnl_with_live_price(csv_path: str, symbol: str):
     total_pl = realized_pl + unrealized_pl
 
     # ---------------- Print Summary ---------------- #
-    print(f"Symbol: {symbol.upper()}")
-    print(f"Live price: ${current_price:,.2f}")
-    print(f"Open shares: {open_qty:.0f}")
-    print(f"Avg cost: ${avg_cost:,.2f}")
-    print(f"Market value: ${market_value:,.2f}")
-    print(f"Realized P&L: ${realized_pl:,.2f}")
-    print(f"Unrealized P&L: ${unrealized_pl:,.2f}")
-    print(f"Total P&L: ${total_pl:,.2f}")
 
     return {
         "symbol": symbol.upper(),
