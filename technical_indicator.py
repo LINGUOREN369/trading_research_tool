@@ -24,3 +24,4 @@ def MACD_calculator(data, short_window=12, long_window=26, signal_window=9):
 def momentum_calculator(data, window=14):
     momentum = data["Close"].diff(periods=window)
     return momentum
+
