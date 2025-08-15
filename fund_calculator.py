@@ -27,7 +27,7 @@ def concat_csv_files(folder_path):
 
 
 
-def calculate_dividends_and_funds(df):
+def calculate_dividends(df):
     """
     Calculate total dividends and electric fund contributions.
     
@@ -38,9 +38,8 @@ def calculate_dividends_and_funds(df):
         tuple: (total_dividends, total_electric_fund)
     """
     total_dividends = df[df["Action"].str.contains("DIVIDEND", case=False, na=False)]["Amount ($)"].sum()
-    total_electric_fund = df[df["Action"].str.contains("Electronic Funds Transfer Received \(Cash\)", case=False, na=False)]["Amount ($)"].sum()
     
-    return total_dividends, total_electric_fund
+    return total_dividends
 
 
 
